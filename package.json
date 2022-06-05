@@ -1,0 +1,27 @@
+{
+  "name": "queue-manager-promise",
+  "version": "0.0.0",
+  "description": "queue manager for promises",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "queue",
+    "promises"
+  ],
+  "author": "Daniel Herrero Tomás",
+  "license": "ISC",
+  "files": [
+    "lib/**/*"
+  ],
+  "devDependencies": {
+    "prettier": "2.6.2",
+    "tslint": "6.1.3",
+    "tslint-config-prettier": "1.18.0",
+    "typescript": "4.7.3"
+  }
+}
