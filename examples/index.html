@@ -1,64 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Example Queue Manager</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+      crossorigin="anonymous" />
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>var exports = {};</script>
-    <script src="../lib/index.js"></script>
-</head>
+  </head>
 
-<body>
+  <body>
     <main class="container m-2">
-        <div class="row">
-            <div class="col-6">
-                <button class="btn btn-success" id="queuingCallBTN">Queuing calls</button>
-                <p>Clicks <span id="queuingCallResults"></span></p>
-            </div>
-            <div class="col-6">
-                <button class="btn btn-info" id="normalCallBTN">Normal Call</button>
-                <p>Clicks <span id="normalCallResults"></span></p>
-            </div>
+      <div class="row">
+        <div class="col-6">
+          <button class="btn btn-success" id="queuingCallBTN">Queuing calls</button>
+          <p>Clicks <span id="queuingCallResults"></span></p>
         </div>
+        <div class="col-6">
+          <button class="btn btn-info" id="normalCallBTN">Normal Call</button>
+          <p>Clicks <span id="normalCallResults"></span></p>
+        </div>
+      </div>
     </main>
-    <script>
+    <script type="module">
+      import { PromisesQueueManager } from '../lib/queue-manager.class.min.js';
 
-        const getCharacter = () => {
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve(axios.get('https://rickandmortyapi.com/api/character'));
-                }, 5000)
-            })
-        }
+      const queue = new PromisesQueueManager('sessionStorage');
 
-        let normalCalls = [];
-        let queueCalls = [];
+      const getCharacter = () => {
+        /** local API server with https://mockoon.com/ */
+        return axios.get('http://localhost:3000/users');
+      };
 
-        const queue = new PromisesQueueManager();
+      const click = (buttonId, callback) => {
+        document.getElementById(buttonId).addEventListener('click', callback);
+      };
 
-        document.getElementById('normalCallBTN').addEventListener('click', async () => {
-            const result = await getCharacter();
-            normalCalls.push(result);
-            document.getElementById('normalCallResults').innerHTML = normalCalls.length;
-            console.log(normalCalls);
+      let normalCalls = [];
+      let queueCalls = [];
+
+      /** API Calls without queue manager **/
+      click('normalCallBTN', async () => {
+        const result = await getCharacter();
+        normalCalls.push(result);
+        document.getElementById('normalCallResults').innerHTML = normalCalls.length;
+        console.log(normalCalls);
+      });
+
+      /** API Calls with queue manager **/
+      click('queuingCallBTN', async () => {
+        const result = await queue.callPromise('getCharacter', {
+          fn: getCharacter
         });
-
-
-        document.getElementById('queuingCallBTN').addEventListener('click', async () => {
-            const result = await queue.callPromise('getCharacter', {
-                fn: getCharacter
-            });
-            queueCalls.push(result)
-            document.getElementById('queuingCallResults').innerHTML = queueCalls.length;
-            console.log(queueCalls)
-        });
-
+        queueCalls.push(result);
+        document.getElementById('queuingCallResults').innerHTML = queueCalls.length;
+        console.log(queueCalls);
+      });
     </script>
-</body>
-
+  </body>
 </html>

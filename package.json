@@ -1,20 +1,36 @@
 {
   "name": "queue-manager-promise",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "queue manager for promises",
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "lint": "tslint -p tsconfig.json",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [
     "queue",
-    "promises"
+    "promises",
+    "ajax",
+    "request"
   ],
-  "author": "Daniel Herrero Tomás",
-  "license": "ISC",
+  "author": {
+    "name": "Daniel Herrero Tomás",
+    "url": "https://github.com/dherrero"
+  },
+  "main": "./lib/queue-manager.class.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dherrero/promise-queue-manager"
+  },
+  "bugs": {
+    "url": "https://github.com/dherrero/promise-queue-manager/issues"
+  },
+  "scripts": {
+    "build": "rm -fr ./lib && tsc && npm run clean",
+    "build:pro": "npm run build && npm run uglify",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -fr ./lib/*.types.*",
+    "uglify": "uglifyjs -c -m -o ./lib/queue-manager.class.min.js ./lib/queue-manager.class.js --source-map"
+  },
+  "license": "MIT",
   "files": [
     "lib/**/*"
   ],
@@ -22,6 +38,7 @@
     "prettier": "2.6.2",
     "tslint": "6.1.3",
     "tslint-config-prettier": "1.18.0",
-    "typescript": "4.7.3"
+    "typescript": "4.7.3",
+    "uglify-js": "^3.17.4"
   }
 }
