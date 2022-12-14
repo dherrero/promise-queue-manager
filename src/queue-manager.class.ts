@@ -1,5 +1,5 @@
 import { Dictionary, Worker, Patient, PromiseType, StoreType } from './queue-manager.types';
-export default class PromisesQueueManager<T> {
+export class PromisesQueueManager<T> {
   private resultStoreMap: Dictionary<T> = {};
   private queueMap: Dictionary<Worker<T>> = {};
   private store: StoreType;
