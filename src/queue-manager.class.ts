@@ -1,36 +1,25 @@
-export interface PromiseType<T> {
-  fn: (...args: unknown[]) => Promise<T>;
-  args?: unknown[];
-}
-
-export interface Dictionary<T> {
-  [key: string]: T;
-}
-
-interface Patient<T> {
-  resolve: (value: T | PromiseLike<T>) => void;
-  reject: (e: Error) => void;
-}
-
-interface Worker<T> extends Patient<T> {
-  working: boolean;
-  waitingRoom: Patient<T>[];
-  promise: Promise<T>;
-}
-
-type StoreType = 'localStorage' | 'sessionStorage' | undefined;
-
-export default class PromisesQueueManager<T> {
+import { Dictionary, Worker, Patient, PromiseType, StoreType } from './queue-manager.types';
+export class PromisesQueueManager<T> {
   private resultStoreMap: Dictionary<T> = {};
   private queueMap: Dictionary<Worker<T>> = {};
   private store: StoreType;
 
+  /**
+   *
+   * @param {StoreType} store configures the queue data storage
+   */
   constructor(store?: StoreType) {
     this.store = store;
   }
 
+  /**
+   *
+   * @param {string} queueName the queue name must be unique per data
+   * @param {PromiseType<T>} promiseCall the promise to obtain the data
+   * @returns {PromiseType<T>} the promise that returns data
+   */
   public callPromise(queueName: string, promiseCall?: PromiseType<T>): Promise<T> {
-    this.checkStorage(queueName);
+    this._checkStorage(queueName);
     return new Promise<T>((resolve, reject) => {
       if (this.resultStoreMap[queueName]) {
         resolve(this.resultStoreMap[queueName]);
@@ -43,10 +32,10 @@ export default class PromisesQueueManager<T> {
           promise: fn(...args),
           resolve,
           reject,
-          waitingRoom: [],
+          waitingRoom: []
         };
         this.queueMap[queueName] = worker;
-        this.dequeue(queueName);
+        this._dequeue(queueName);
       } else {
         const patient: Patient<T> = { resolve, reject };
         this.queueMap[queueName].waitingRoom.push(patient);
@@ -54,17 +43,22 @@ export default class PromisesQueueManager<T> {
     });
   }
 
+  /**
+   *
+   * @param {string} queueName  the queue name
+   * @returns {T} the stored data
+   */
   public getStorageSync(queueName: string): T {
-    this.checkStorage(queueName);
+    this._checkStorage(queueName);
     return this.resultStoreMap[queueName];
   }
 
-  private dequeue(queueName: string) {
+  private _dequeue(queueName: string) {
     const worker: Worker<T> = this.queueMap[queueName];
     worker.promise
       .then((result: T) => {
         this.queueMap[queueName].working = false;
-        this.setStorage(queueName, result);
+        this._setStorage(queueName, result);
         this.queueMap[queueName].waitingRoom.forEach((patient: Patient<T>) => patient.resolve(result));
         worker.resolve(result);
       })
@@ -75,7 +69,7 @@ export default class PromisesQueueManager<T> {
       });
   }
 
-  private checkStorage(queueName: string) {
+  private _checkStorage(queueName: string) {
     if (this.resultStoreMap[queueName]) return;
     if (this.store) {
       const check = window[this.store].getItem(queueName);
@@ -85,7 +79,7 @@ export default class PromisesQueueManager<T> {
     }
   }
 
-  private setStorage(queueName: string, result: T) {
+  private _setStorage(queueName: string, result: T) {
     this.resultStoreMap[queueName] = result;
     if (this.store) {
       window[this.store].setItem(queueName, JSON.stringify(result));
